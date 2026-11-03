@@ -30,7 +30,7 @@ def send_telegram_alert(message):
             print(f"Error sending request: {e}")
 
 def check_vox_movies():
-    print("Starting Playwright to check Vox Cinemas...")
+    print("Starting Playwright to check Vox Cinemas movie page...")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -39,26 +39,28 @@ def check_vox_movies():
         page = context.new_page()
         
         try:
-            print("جارٍ تصفح موقع فوكس سينما مصر...")
-            # استخدام الرابط الصحيح والمضبوط للنسخة المصرية
-            page.goto("https://egy.voxcinemas.com/", timeout=60000, wait_until="domcontentloaded")
-            page.wait_for_timeout(5000)
+            print("جارٍ تصفح صفحة فيلم Avengers: Doomsday على فوكس سينما...")
+            # استخدام الرابط المباشر الدقيق للفيلم
+            page.goto("https://egy.voxcinemas.com/movies/avengers-doomsday-infinity-vision", timeout=60000, wait_until="domcontentloaded")
+            page.wait_for_timeout(6000)
             
             page_content = page.content().lower()
-            target_movie = "avengers: doomsday"
             
-            if target_movie in page_content:
-                # رسالة حالة فتح الحجز الفعلي
-                message = "🚨 *تنبيه هام جداً!* \n\nتم رصد حجز فيلم *Avengers: Doomsday* على موقع فوكس سينما مصر! الحق احجز الآن! 🎬🔥"
+            # استهداف تاريخ 25 ديسمبر بالتحديد
+            target_date = "25 dec"
+            
+            if target_date in page_content:
+                # رسالة حالة فتح حجز اليوم المستهدف
+                message = "🚨 *تنبيه هام جداً!* \n\nتم رصد فتح حجز يوم *Friday 25 Dec* لفيلم *Avengers: Doomsday* على فوكس سينما مصر! الحق احجز الآن! 🎬🔥"
                 send_telegram_alert(message)
             else:
-                print("Movie 'Avengers: Doomsday' not available for booking yet.")
-                # رسالة دورية تؤكد أن السكربت شغال وكل شيء تمام
-                status_message = "🤖 *تحديث بوت فوكس:* \n\nتم فحص الموقع بنجاح، فيلم *Avengers: Doomsday* غير متاح للحجز حتى الآن. جارٍ المتابعة المستمرة... ⏳"
+                print("Booking for 'Fri 25 Dec' not available yet.")
+                # رسالة دورية تؤكد أن السكربت شغال وبراقب تاريخ 25 ديسمبر
+                status_message = "🤖 *تحديث بوت فوكس:* \n\nتم فحص صفحة الفيلم بنجاح، حجز يوم *25 Dec* لم يُفتح بعد. جارٍ المتابعة المستمرة... ⏳"
                 send_telegram_alert(status_message)
                 
         except Exception as e:
-            error_message = f"⚠️ *تنبيه خطأ في بوت فوكس:* \n\nحدث استثناء أثناء تصفح الموقع: {str(e)}"
+            error_message = f"⚠️ *تنبيه خطأ في بوت فوكس:* \n\nحدث استثناء أثناء تصفح صفحة الفيلم: {str(e)}"
             send_telegram_alert(error_message)
             print(f"حدث خطأ أثناء تصفح الموقع: {e}")
             
