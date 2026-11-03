@@ -32,7 +32,6 @@ def send_telegram_alert(message):
 def check_vox_movies():
     print("Starting Playwright to check Vox Cinemas...")
     with sync_playwright() as p:
-        # تشغيل المتصفح مع إعدادات تحاكي متصفح حقيقي لتجنب الحظر
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -40,24 +39,26 @@ def check_vox_movies():
         page = context.new_page()
         
         try:
-            # الدخول على الموقع الرئيسي لفوكس سينما مصر أولاً
             print("جارٍ تصفح موقع فوكس سينما مصر...")
-            page.goto("https://egypt.voxcinemas.com/", timeout=60000, wait_until="domcontentloaded")
+            page.goto("https://egy.voxcinemas.com/", timeout=60000, wait_until="domcontentloaded")
             page.wait_for_timeout(5000)
             
-            # محاولة الانتقال لصفحة الأفلام أو البحث
             page_content = page.content().lower()
-            
-            # كلمة البحث عن الفيلم
             target_movie = "avengers: doomsday"
             
             if target_movie in page_content:
+                # رسالة حالة فتح الحجز
                 message = "🚨 *تنبيه هام جداً!* \n\nتم رصد حجز فيلم *Avengers: Doomsday* على موقع فوكس سينما مصر! الحق احجز الآن! 🎬🔥"
                 send_telegram_alert(message)
             else:
                 print("Movie 'Avengers: Doomsday' not available for booking yet.")
+                # رسالة دورية تؤكد أن السكربت شغال والحجز لسه مانزلش
+                status_message = "🤖 *تحديث بوت فوكس:* \n\nتم فحص الموقع بنجاح، فيلم *Avengers: Doomsday* غير متاح للحجز حتى الآن. جارٍ المتابعة المستمرة... ⏳"
+                send_telegram_alert(status_message)
                 
         except Exception as e:
+            error_message = f"⚠️ *تنبيه خطأ في بوت فوكس:* \n\nحدث استثناء أثناء تصفح الموقع: {str(e)}"
+            send_telegram_alert(error_message)
             print(f"حدث خطأ أثناء تصفح الموقع: {e}")
             
         finally:
