@@ -2,17 +2,13 @@ import os
 import requests
 from playwright.sync_api import sync_playwright
 
-# توكن البوت يتم جلبه من متغيرات الأمان في جيت هب
-TOKEN = os.environ.get("TELEGRAM_TOKEN")
+# وضع التوكن مباشرة هنا لتجنب أي مشاكل في قراءته من جيت هب
+TOKEN = "9059974930:AAFULCudI3gIep-C1HufG2dIVwJDJrjO_2I"
 
 # قائمة الـ Chat IDs الخاصة بك وبصاحبك
 CHAT_IDS = ["1152120052", "1932248872"]
 
 def send_telegram_alert(message):
-    if not TOKEN:
-        print("Telegram token not found!")
-        return
-        
     for chat_id in CHAT_IDS:
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         payload = {
@@ -32,20 +28,30 @@ def send_telegram_alert(message):
 def check_vox_movies():
     print("Starting Playwright to check Vox Cinemas movie page...")
     with sync_playwright() as p:
-        # إضافة args لتجاوز مشاكل بروتوكول HTTP/2 وتجنب الحظر
         browser = p.chromium.launch(
             headless=True,
-            args=["--disable-http2", "--no-sandbox", "--disable-setuid-sandbox"]
+            args=[
+                "--disable-http2", 
+                "--no-sandbox", 
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-accelerated-2d-canvas",
+                "--disable-gpu"
+            ]
         )
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 800}
         )
         page = context.new_page()
         
         try:
             print("جارٍ تصفح صفحة فيلم Avengers: Doomsday على فوكس سينما...")
-            page.goto("https://egy.voxcinemas.com/movies/avengers-doomsday-infinity-vision", timeout=60000, wait_until="domcontentloaded")
-            page.wait_for_timeout(6000)
+            # استخدام 'commit' لتجاوز مشاكل الانتظار الطويل وتحميل الصفحة بسرعة
+            page.goto("https://egy.voxcinemas.com/movies/avengers-doomsday-infinity-vision", timeout=60000, wait_until="commit")
+            
+            # الانتظار حتى تظهر النصوص الأساسية أو مرور ثوانٍ آمنة
+            page.wait_for_timeout(8000)
             
             page_content = page.content().lower()
             
