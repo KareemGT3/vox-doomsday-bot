@@ -1,4 +1,3 @@
-تفضل يا كريم! تم تحديث السكريبت كاملاً وإضافة الـ Chat ID الخاص بك (1152120052) والـ Chat ID الخاص بصاحبك (1932248872) داخل القائمة CHAT_IDS لكي تصلكم التنبيهات معاً في نفس اللحظة فور توفر الحجز:
 import os
 import requests
 from playwright.sync_api import sync_playwright
@@ -33,15 +32,20 @@ def send_telegram_alert(message):
 def check_vox_movies():
     print("Starting Playwright to check Vox Cinemas...")
     with sync_playwright() as p:
-        # تشغيل المتصفح في الخلفية
+        # تشغيل المتصفح مع إعدادات تحاكي متصفح حقيقي لتجنب الحظر
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+        page = context.new_page()
         
         try:
-            # رابط موقع فوكس سينما مصر (أو صفحة البحث الخاصة بالفيلم)
-            page.goto("https://egypt.voxcinemas.com/", timeout=60000)
-            page.wait_for_timeout(5000) # انتظار تحميل الصفحة بالكامل
+            # الدخول على الموقع الرئيسي لفوكس سينما مصر أولاً
+            print("جارٍ تصفح موقع فوكس سينما مصر...")
+            page.goto("https://egypt.voxcinemas.com/", timeout=60000, wait_until="domcontentloaded")
+            page.wait_for_timeout(5000)
             
+            # محاولة الانتقال لصفحة الأفلام أو البحث
             page_content = page.content().lower()
             
             # كلمة البحث عن الفيلم
@@ -54,16 +58,10 @@ def check_vox_movies():
                 print("Movie 'Avengers: Doomsday' not available for booking yet.")
                 
         except Exception as e:
-            print(f"An error occurred while scraping: {e}")
+            print(f"حدث خطأ أثناء تصفح الموقع: {e}")
             
         finally:
             browser.close()
 
 if __name__ == "__main__":
     check_vox_movies()
-
-الخطوة الأخيرة:
- * انسخ الكود أعلاه بالكامل.
- * توجه إلى ملف main.py في مستودع GitHub الخاص بك.
- * الصق الكود واضغط على Commit changes لحفظ التعديلات.
-بكده السكريبت جاهز تماماً وهيبعت التنبيه ليك إنت وصاحبك مع بعض أوتوماتيكياً. بالتوفيق يا بطل وإن شاء الله تلحقوا الحجز أول ما ينزل!
