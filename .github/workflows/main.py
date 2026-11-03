@@ -40,6 +40,7 @@ def check_vox_movies():
         
         try:
             print("جارٍ تصفح موقع فوكس سينما مصر...")
+            # استخدام الرابط الصحيح والمضبوط للنسخة المصرية
             page.goto("https://egy.voxcinemas.com/", timeout=60000, wait_until="domcontentloaded")
             page.wait_for_timeout(5000)
             
@@ -47,12 +48,12 @@ def check_vox_movies():
             target_movie = "avengers: doomsday"
             
             if target_movie in page_content:
-                # رسالة حالة فتح الحجز
+                # رسالة حالة فتح الحجز الفعلي
                 message = "🚨 *تنبيه هام جداً!* \n\nتم رصد حجز فيلم *Avengers: Doomsday* على موقع فوكس سينما مصر! الحق احجز الآن! 🎬🔥"
                 send_telegram_alert(message)
             else:
                 print("Movie 'Avengers: Doomsday' not available for booking yet.")
-                # رسالة دورية تؤكد أن السكربت شغال والحجز لسه مانزلش
+                # رسالة دورية تؤكد أن السكربت شغال وكل شيء تمام
                 status_message = "🤖 *تحديث بوت فوكس:* \n\nتم فحص الموقع بنجاح، فيلم *Avengers: Doomsday* غير متاح للحجز حتى الآن. جارٍ المتابعة المستمرة... ⏳"
                 send_telegram_alert(status_message)
                 
