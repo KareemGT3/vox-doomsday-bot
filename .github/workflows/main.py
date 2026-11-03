@@ -32,7 +32,11 @@ def send_telegram_alert(message):
 def check_vox_movies():
     print("Starting Playwright to check Vox Cinemas movie page...")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        # إضافة args لتجاوز مشاكل بروتوكول HTTP/2 وتجنب الحظر
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--disable-http2", "--no-sandbox", "--disable-setuid-sandbox"]
+        )
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
@@ -40,7 +44,6 @@ def check_vox_movies():
         
         try:
             print("جارٍ تصفح صفحة فيلم Avengers: Doomsday على فوكس سينما...")
-            # استخدام الرابط المباشر الدقيق للفيلم
             page.goto("https://egy.voxcinemas.com/movies/avengers-doomsday-infinity-vision", timeout=60000, wait_until="domcontentloaded")
             page.wait_for_timeout(6000)
             
@@ -50,12 +53,10 @@ def check_vox_movies():
             target_date = "25 dec"
             
             if target_date in page_content:
-                # رسالة حالة فتح حجز اليوم المستهدف
                 message = "🚨 *تنبيه هام جداً!* \n\nتم رصد فتح حجز يوم *Friday 25 Dec* لفيلم *Avengers: Doomsday* على فوكس سينما مصر! الحق احجز الآن! 🎬🔥"
                 send_telegram_alert(message)
             else:
                 print("Booking for 'Fri 25 Dec' not available yet.")
-                # رسالة دورية تؤكد أن السكربت شغال وبراقب تاريخ 25 ديسمبر
                 status_message = "🤖 *تحديث بوت فوكس:* \n\nتم فحص صفحة الفيلم بنجاح، حجز يوم *25 Dec* لم يُفتح بعد. جارٍ المتابعة المستمرة... ⏳"
                 send_telegram_alert(status_message)
                 
