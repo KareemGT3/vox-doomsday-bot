@@ -8,6 +8,7 @@ TOKEN = os.environ["TELEGRAM_TOKEN"]
 CHAT_IDS = ["1152120052", "1932248872"]
 URL = "https://egy.voxcinemas.com/movies/avengers-doomsday-infinity-vision"
 
+
 def send_telegram_alert(message):
     for chat_id in CHAT_IDS:
         try:
@@ -20,12 +21,17 @@ def send_telegram_alert(message):
         except Exception as e:
             print(f"Error sending request: {e}")
 
+
 def fetch_page_text():
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage",
-                  "--disable-blink-features=AutomationControlled"],
+            args=[
+                "--disable-http2",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled",
+            ],
         )
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -42,6 +48,7 @@ def fetch_page_text():
             return page.inner_text("body").lower()
         finally:
             browser.close()
+
 
 def check_vox_movies():
     last_error = None
@@ -63,8 +70,8 @@ def check_vox_movies():
             time.sleep(10)
 
     print(f"All attempts failed: {last_error}")
-    # Make the job fail visibly instead of showing a fake green check
     raise SystemExit(1)
+
 
 if __name__ == "__main__":
     check_vox_movies()
